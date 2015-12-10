@@ -8,11 +8,16 @@ namespace FormattableSql.Core
 {
     public interface IFormattableSqlProvider
     {
-        event FormattableSqlProvider.CommandGeneratedEventHandler CommandGenerated;
+        event CommandPreparedEventHandler CommandPrepared;
 
         Task<IReadOnlyCollection<TResult>> QueryAsync<TResult>(
             FormattableString query,
-            Func<IAsyncDataRecord, TResult> createResult,
+            Func<IAsyncDataRecord, Task<TResult>> createResultAsync,
+            CancellationToken cancellationToken);
+
+        Task QueryAsync(
+            FormattableString query,
+            Func<IAsyncDataRecord, Task> handleRowAsync,
             CancellationToken cancellationToken);
     }
 }

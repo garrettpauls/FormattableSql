@@ -8,10 +8,10 @@ using System.Threading.Tasks;
 
 namespace FormattableSql.Core
 {
+    public delegate void CommandPreparedEventHandler(FormattableSqlProvider sender, DbCommand command);
+
     public sealed class FormattableSqlProvider : IFormattableSqlProvider
     {
-        public delegate void CommandGeneratedEventHandler(FormattableSqlProvider sender, DbCommand command);
-
         private readonly ISqlProvider mSQLProvider;
 
         public FormattableSqlProvider(ISqlProvider sqlProvider)
@@ -19,27 +19,34 @@ namespace FormattableSql.Core
             mSQLProvider = sqlProvider;
         }
 
-        public event CommandGeneratedEventHandler CommandGenerated;
+        public event CommandPreparedEventHandler CommandPrepared;
 
         public async Task<IReadOnlyCollection<TResult>> QueryAsync<TResult>(
             FormattableString query,
-            Func<IAsyncDataRecord, TResult> createResult,
+            Func<IAsyncDataRecord, Task<TResult>> createResultAsync,
             CancellationToken cancellationToken)
         {
             var results = new List<TResult>();
 
+            await QueryAsync(query, async row => results.Add(await createResultAsync(row)), cancellationToken);
+
+            return results.AsReadOnly();
+        }
+
+        public async Task QueryAsync(
+            FormattableString query,
+            Func<IAsyncDataRecord, Task> handleRowAsync,
+            CancellationToken cancellationToken)
+        {
             using (var connection = mSQLProvider.CreateConnection())
             using (var command = _CreateCommand(connection, query))
             using (var reader = await _ExecuteReaderAsync(command, cancellationToken))
             {
                 while (await reader.ReadAsync(cancellationToken))
                 {
-                    var item = createResult(new DbDataReaderAsyncRecord(reader));
-                    results.Add(item);
+                    await handleRowAsync(new DbDataReaderAsyncRecord(reader));
                 }
             }
-
-            return results.AsReadOnly();
         }
 
         private static async Task<DbDataReader> _ExecuteReaderAsync(DbCommand command, CancellationToken cancellationToken)
@@ -65,7 +72,7 @@ namespace FormattableSql.Core
 
             command.CommandText = string.Format(query.Format, parameterNames);
 
-            CommandGenerated?.Invoke(this, command);
+            CommandPrepared?.Invoke(this, command);
 
             return command;
         }
