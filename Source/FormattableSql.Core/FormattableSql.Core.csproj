@@ -40,7 +40,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Data\DbDataReaderAsyncRecord.cs" />
+    <Compile Include="Data\GenericSqlProvider.cs" />
+    <Compile Include="Data\IAsyncDataRecord.cs" />
+    <Compile Include="Data\SqlProvider.cs" />
     <Compile Include="FormattableSqlProvider.cs" />
+    <Compile Include="IFormattableSqlProvider.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Data\ISqlProvider.cs" />
   </ItemGroup>

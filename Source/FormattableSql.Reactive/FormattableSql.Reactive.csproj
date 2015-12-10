@@ -56,7 +56,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="IReactiveFormattableSqlProvider.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ReactiveFormattableSqlProvider.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\FormattableSql.Core\FormattableSql.Core.csproj">
