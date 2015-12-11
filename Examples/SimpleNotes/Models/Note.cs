@@ -9,7 +9,6 @@ namespace SimpleNotes.Models
         private long mId;
         private string mText;
         private string mTitle;
-        private string mUser;
 
         public long Id
         {
@@ -31,15 +30,14 @@ namespace SimpleNotes.Models
             set { this.RaiseAndSetIfChanged(ref mTitle, value); }
         }
 
-        public string User
-        {
-            get { return mUser; }
-            set { this.RaiseAndSetIfChanged(ref mUser, value); }
-        }
-
         public bool Equals(Note other)
         {
             return Id.Equals(other?.Id);
+        }
+
+        public override string ToString()
+        {
+            return Title;
         }
     }
 }

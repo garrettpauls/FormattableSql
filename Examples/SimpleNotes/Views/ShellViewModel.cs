@@ -15,7 +15,7 @@ namespace SimpleNotes.Views
         private readonly ReactiveList<NoteViewModel> mNotes = new NoRangeReactiveList<NoteViewModel>();
         private string mSearchText = "";
 
-        public ShellViewModel() : this(new NotesService())
+        public ShellViewModel() : this(App.Services.NotesService)
         {
         }
 

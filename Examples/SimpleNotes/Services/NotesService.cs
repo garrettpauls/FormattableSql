@@ -3,6 +3,7 @@ using SimpleNotes.Models;
 using System;
 using System.Reactive.Concurrency;
 using System.Reactive.Linq;
+using System.Threading.Tasks;
 
 namespace SimpleNotes.Services
 {
@@ -10,19 +11,16 @@ namespace SimpleNotes.Services
     {
         private readonly SourceList<Note> mNotes = new SourceList<Note>();
 
-        public NotesService()
+        public IObservableList<Note> Notes => mNotes;
+
+        public void Add(Note note)
         {
-            Observable
-                .Generate(1, x => true, x => x + 1, x => new Note
-                {
-                    Title = $"Note {x}",
-                    Text = $"Some text for note {x}",
-                    User = Environment.UserName
-                }, x => TimeSpan.FromSeconds(1), Scheduler.Default)
-                .Take(5)
-                .Subscribe(note => mNotes.Add(note));
+            mNotes.Add(note);
         }
 
-        public IObservableList<Note> Notes => mNotes;
+        public void Remove(Note note)
+        {
+            mNotes.Remove(note);
+        }
     }
 }

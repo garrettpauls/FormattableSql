@@ -21,8 +21,106 @@ namespace FormattableSql.Core
 
         public event CommandPreparedEventHandler CommandPrepared;
 
+        public async Task<int> ExecuteAsync(
+            FormattableString sql,
+            CancellationToken cancellationToken)
+        {
+            int result;
+
+            using (var connection = await _OpenNewConnectionAsync(cancellationToken))
+            using (var transaction = connection.BeginTransaction())
+            using (var command = _CreateCommand(connection, sql))
+            {
+                result = await command.ExecuteNonQueryAsync(cancellationToken);
+                cancellationToken.ThrowIfCancellationRequested();
+                transaction.Commit();
+            }
+
+            return result;
+        }
+
+        public Task<int> ExecuteAsync(FormattableString sql)
+        {
+            return ExecuteAsync(sql, CancellationToken.None);
+        }
+
+        public async Task<IReadOnlyList<int>> ExecuteManyAsync<TItem>(
+            Func<TItem, FormattableString> buildSql,
+            CancellationToken cancellationToken,
+            params TItem[] items)
+        {
+            var results = new int[items.Length];
+
+            using (var connection = await _OpenNewConnectionAsync(cancellationToken))
+            using (var transaction = connection.BeginTransaction())
+            {
+                for (int i = 0; i < items.Length; i++)
+                {
+                    using (var command = _CreateCommand(connection, buildSql(items[i])))
+                    {
+                        results[i] = await command.ExecuteNonQueryAsync(cancellationToken);
+                    }
+
+                    cancellationToken.ThrowIfCancellationRequested();
+                }
+
+                transaction.Commit();
+            }
+
+            return results;
+        }
+
+        public Task<IReadOnlyList<int>> ExecuteManyAsync<TItem>(
+            Func<TItem, FormattableString> buildSql,
+            params TItem[] items)
+        {
+            return ExecuteManyAsync(buildSql, items.AsEnumerable());
+        }
+
+        public Task<IReadOnlyList<int>> ExecuteManyAsync<TItem>(
+            Func<TItem, FormattableString> buildSql,
+            CancellationToken cancellationToken,
+            IEnumerable<TItem> items)
+        {
+            return ExecuteManyAsync(buildSql, cancellationToken, items.ToArray());
+        }
+
+        public Task<IReadOnlyList<int>> ExecuteManyAsync<TItem>(
+            Func<TItem, FormattableString> buildSql,
+            IEnumerable<TItem> items)
+        {
+            return ExecuteManyAsync(buildSql, CancellationToken.None, items);
+        }
+
+        public Task<T> ExecuteScalarAsync<T>(
+            FormattableString sql)
+        {
+            return ExecuteScalarAsync<T>(sql, CancellationToken.None);
+        }
+
+        public async Task<T> ExecuteScalarAsync<T>(
+            FormattableString sql,
+            CancellationToken cancellationToken)
+        {
+            T result;
+
+            using (var connection = await _OpenNewConnectionAsync(cancellationToken))
+            using (var transaction = connection.BeginTransaction())
+            using (var command = _CreateCommand(connection, sql))
+            {
+                var objResult = await command.ExecuteScalarAsync(cancellationToken);
+                cancellationToken.ThrowIfCancellationRequested();
+
+                result = (T)Convert.ChangeType(objResult, typeof(T));
+                cancellationToken.ThrowIfCancellationRequested();
+                transaction.Commit();
+            }
+
+            return result;
+        }
+
         public async Task<IReadOnlyCollection<TResult>> QueryAsync<TResult>(
-            FormattableString query,
+                                            FormattableString query,
             Func<IAsyncDataRecord, Task<TResult>> createResultAsync,
             CancellationToken cancellationToken)
         {
@@ -33,12 +131,19 @@ namespace FormattableSql.Core
             return results.AsReadOnly();
         }
 
+        public Task<IReadOnlyCollection<TResult>> QueryAsync<TResult>(
+            FormattableString query,
+            Func<IAsyncDataRecord, Task<TResult>> createResultAsync)
+        {
+            return QueryAsync(query, createResultAsync, CancellationToken.None);
+        }
+
         public async Task QueryAsync(
             FormattableString query,
             Func<IAsyncDataRecord, Task> handleRowAsync,
             CancellationToken cancellationToken)
         {
-            using (var connection = mSQLProvider.CreateConnection())
+            using (var connection = await _OpenNewConnectionAsync(cancellationToken))
             using (var command = _CreateCommand(connection, query))
             using (var reader = await _ExecuteReaderAsync(command, cancellationToken))
             {
@@ -49,17 +154,27 @@ namespace FormattableSql.Core
             }
         }
 
-        private static async Task<DbDataReader> _ExecuteReaderAsync(DbCommand command, CancellationToken cancellationToken)
+        public Task QueryAsync(
+            FormattableString query,
+            Func<IAsyncDataRecord, Task> handleRowAsync)
         {
-            await command.Connection.OpenAsync(cancellationToken);
+            return QueryAsync(query, handleRowAsync, CancellationToken.None);
+        }
+
+        private static async Task<DbDataReader> _ExecuteReaderAsync(
+            DbCommand command,
+            CancellationToken cancellationToken)
+        {
             return await command.ExecuteReaderAsync(cancellationToken);
         }
 
-        private DbCommand _CreateCommand(DbConnection connection, FormattableString query)
+        private DbCommand _CreateCommand(
+            DbConnection connection,
+            FormattableString sql)
         {
             var command = connection.CreateCommand();
 
-            var parameterNames = query
+            var parameterNames = sql
                 .GetArguments()
                 .Select((arg, idx) =>
                 {
@@ -70,11 +185,18 @@ namespace FormattableSql.Core
                 .Cast<object>()
                 .ToArray();
 
-            command.CommandText = string.Format(query.Format, parameterNames);
+            command.CommandText = string.Format(sql.Format, parameterNames);
 
             CommandPrepared?.Invoke(this, command);
 
             return command;
+        }
+
+        private async Task<DbConnection> _OpenNewConnectionAsync(CancellationToken cancellationToken)
+        {
+            var connection = mSQLProvider.CreateConnection();
+            await connection.OpenAsync(cancellationToken);
+            return connection;
         }
     }
 }

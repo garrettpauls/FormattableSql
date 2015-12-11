@@ -1,17 +1,23 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Configuration;
-using System.Data;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using SimpleNotes.Services;
+
 using System.Windows;
 
 namespace SimpleNotes
 {
-    /// <summary>
-    /// Interaction logic for App.xaml
-    /// </summary>
     public partial class App : Application
     {
+        public static ServiceManager Services { get; } = new ServiceManager();
+
+        protected override void OnExit(ExitEventArgs e)
+        {
+            Services.Dispose();
+            base.OnExit(e);
+        }
+
+        protected override async void OnStartup(StartupEventArgs e)
+        {
+            await Services.InitializeAsync();
+            base.OnStartup(e);
+        }
     }
 }
