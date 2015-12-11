@@ -19,7 +19,8 @@ namespace SimpleNotes.Framework.Data
             return new SQLiteSqlProvider(new SQLiteConnectionStringBuilder
             {
                 DataSource = file,
-                ForeignKeys = true
+                ForeignKeys = true,
+                DateTimeFormat = SQLiteDateFormats.ISO8601
             }.ConnectionString);
         }
 
