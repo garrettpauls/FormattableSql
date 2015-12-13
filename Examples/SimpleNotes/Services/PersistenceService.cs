@@ -35,7 +35,6 @@ namespace SimpleNotes.Services
                          .TrackWith(mDisposables);
 
             mNotesService.Notes.Connect()
-                         .SkipUntil(mIsInitialized)
                          .Transform(note => new NoteChangeMonitor(note, this))
                          .DisposeMany()
                          .Subscribe()

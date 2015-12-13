@@ -1,9 +1,5 @@
 ﻿using DynamicData;
 using SimpleNotes.Models;
-using System;
-using System.Reactive.Concurrency;
-using System.Reactive.Linq;
-using System.Threading.Tasks;
 
 namespace SimpleNotes.Services
 {

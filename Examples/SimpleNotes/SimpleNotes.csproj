@@ -180,10 +180,6 @@
       <Project>{321116ce-fab2-4667-86ef-9800b654877d}</Project>
       <Name>FormattableSql.Core</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\Source\FormattableSql.Reactive\FormattableSql.Reactive.csproj">
-      <Project>{76699985-cbf1-45f1-a708-633c53c365c8}</Project>
-      <Name>FormattableSql.Reactive</Name>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

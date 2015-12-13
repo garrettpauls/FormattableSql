@@ -11,6 +11,6 @@
     <local:ShellViewModel />
   </Window.DataContext>
   <Grid Margin="4">
-    <rx:RoutedViewHost Router="{Binding Router}" />
+    <rx:RoutedViewHost Router="{Binding Router}" IsTabStop="False" />
   </Grid>
 </Window>

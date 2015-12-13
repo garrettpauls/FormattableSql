@@ -8,10 +8,43 @@
              d:DesignHeight="300" d:DesignWidth="300">
   <Grid>
     <Grid.RowDefinitions>
+      <RowDefinition Height="Auto" />
       <RowDefinition Height="*" />
       <RowDefinition Height="Auto" />
+      <RowDefinition Height="Auto" />
+      <RowDefinition Height="Auto" />
     </Grid.RowDefinitions>
-    <TextBlock Text="TODO: Edit note" />
-    <Button Grid.Row="1" Content="Done" Command="{Binding DoneCommand}" />
+    <Grid.Resources>
+      <Style TargetType="HeaderedContentControl">
+        <Setter Property="IsTabStop" Value="False" />
+        <Setter Property="Template">
+          <Setter.Value>
+            <ControlTemplate TargetType="HeaderedContentControl">
+              <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+                <Grid.RowDefinitions>
+                  <RowDefinition Height="Auto" />
+                  <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+                <TextBlock Text="{TemplateBinding Header}" />
+                <ContentControl Content="{TemplateBinding Content}" IsTabStop="False" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Grid.Row="1" />
+              </Grid>
+            </ControlTemplate>
+          </Setter.Value>
+        </Setter>
+      </Style>
+    </Grid.Resources>
+    <HeaderedContentControl Header="Title" Grid.Row="0">
+      <TextBox Text="{Binding Model.Title}" />
+    </HeaderedContentControl>
+    <HeaderedContentControl Header="Text" Grid.Row="1" VerticalAlignment="Stretch">
+      <TextBox Text="{Binding Model.Text}" AcceptsReturn="True" TextWrapping="Wrap" VerticalAlignment="Stretch" />
+    </HeaderedContentControl>
+    <HeaderedContentControl Header="Created" Grid.Row="2">
+      <TextBlock Text="{Binding LocalCreationInstant, StringFormat=F}" />
+    </HeaderedContentControl>
+    <HeaderedContentControl Header="Updated" Grid.Row="3">
+      <TextBlock Text="{Binding LocalUpdateInstant, StringFormat=F}" />
+    </HeaderedContentControl>
+    <Button Grid.Row="4" Content="Done" Command="{Binding DoneCommand}" />
   </Grid>
 </UserControl>
