@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<package >
+<package>
   <metadata>
     <id>FormattableSql.Core</id>
     <version>$version$</version>
@@ -10,8 +10,9 @@
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>Use C# 6 and FormattableString to convert SQL and embedded data to properly parameterized commands.</description>
     <releaseNotes>
-<![CDATA[
+      <![CDATA[
 Version 1.0.0-alpha
+
 * An alpha release for testing the initial API.
 ]]>
     </releaseNotes>
