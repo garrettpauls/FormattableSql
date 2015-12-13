@@ -4,33 +4,13 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:SimpleNotes.Views"
+        xmlns:rx="clr-namespace:ReactiveUI;assembly=ReactiveUI"
         mc:Ignorable="d"
-        Title="Notes" Height="300" Width="300">
+        Title="Notes" Height="600" Width="800">
   <Window.DataContext>
     <local:ShellViewModel />
   </Window.DataContext>
   <Grid Margin="4">
-    <Grid.RowDefinitions>
-      <RowDefinition Height="Auto" />
-      <RowDefinition Height="*" />
-    </Grid.RowDefinitions>
-    <DockPanel LastChildFill="True">
-      <TextBlock Text="Search: " DockPanel.Dock="Left" />
-      <TextBox Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" />
-    </DockPanel>
-
-    <ListView Grid.Row="1" ItemsSource="{Binding Notes}" SelectionMode="Single" Margin="0 4 0 0">
-      <ListView.ItemsPanel>
-        <ItemsPanelTemplate>
-          <VirtualizingStackPanel />
-        </ItemsPanelTemplate>
-      </ListView.ItemsPanel>
-      <ListView.View>
-        <GridView>
-          <GridViewColumn Header="Title" DisplayMemberBinding="{Binding Model.Title}" />
-          <GridViewColumn Header="User" DisplayMemberBinding="{Binding Model.User}" />
-        </GridView>
-      </ListView.View>
-    </ListView>
+    <rx:RoutedViewHost Router="{Binding Router}" />
   </Grid>
 </Window>

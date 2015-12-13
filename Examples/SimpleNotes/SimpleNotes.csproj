@@ -87,6 +87,7 @@
       <HintPath>..\..\packages\Rx-XAML.2.2.5\lib\net45\System.Reactive.Windows.Threading.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="System.Windows.Interactivity, Version=4.5.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
     <Reference Include="System.Xml" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Core" />
@@ -112,10 +113,19 @@
     <Compile Include="Framework\Data\SQLiteSqlProvider.cs" />
     <Compile Include="Framework\DisposableTracker.cs" />
     <Compile Include="Framework\Reactive\NoRangeReactiveList.cs" />
+    <Compile Include="Framework\Reactive\ReactiveCommandG.cs" />
     <Compile Include="Models\Note.cs" />
     <Compile Include="Services\NotesService.cs" />
     <Compile Include="Services\PersistenceService.cs" />
     <Compile Include="Services\ServiceManager.cs" />
+    <Compile Include="Views\NoteEditView.xaml.cs">
+      <DependentUpon>NoteEditView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\NoteEditViewModel.cs" />
+    <Compile Include="Views\NoteListView.xaml.cs">
+      <DependentUpon>NoteListView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\NoteListViewModel.cs" />
     <Compile Include="Views\NoteViewModel.cs" />
     <Compile Include="Views\NoteViewModelComparer.cs" />
     <Compile Include="Views\Shell.xaml.cs">
@@ -152,6 +162,14 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
+    <Page Include="Views\NoteEditView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\NoteListView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Views\Shell.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

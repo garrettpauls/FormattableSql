@@ -3,62 +3,39 @@ using DynamicData.ReactiveUI;
 using ReactiveUI;
 using SimpleNotes.Framework;
 using SimpleNotes.Framework.Reactive;
+using SimpleNotes.Models;
 using SimpleNotes.Services;
+using Splat;
 using System;
 using System.Reactive.Linq;
+using System.Threading.Tasks;
 
 namespace SimpleNotes.Views
 {
-    public sealed class ShellViewModel : ReactiveObject, IDisposable
+    public sealed class ShellViewModel : ReactiveObject, IScreen
     {
-        private readonly DisposableTracker mDisposables = new DisposableTracker();
-        private readonly ReactiveList<NoteViewModel> mNotes = new NoRangeReactiveList<NoteViewModel>();
-        private string mSearchText = "";
-
-        public ShellViewModel() : this(App.Services.NotesService)
+        public ShellViewModel() : this(App.Services.Router)
         {
         }
 
-        public ShellViewModel(NotesService notesService)
+        public ShellViewModel(RoutingState router)
         {
-            var filter = this
-                .WhenAnyValue(x => x.SearchText)
-                .Select(_BuildFilter);
+            Router = router;
 
-            notesService
-                .Notes.Connect()
-                .Transform(note => new NoteViewModel(note))
-                .Filter(filter)
-                .Sort(new NoteViewModelComparer())
-                .SubscribeOn(RxApp.MainThreadScheduler)
-                .ObserveOn(RxApp.MainThreadScheduler)
-                .Bind(mNotes)
-                .DisposeMany()
-                .Subscribe()
-                .TrackWith(mDisposables);
+            _RegisterParts();
+
+            Router.Navigate.Execute(new NoteListViewModel(this, App.Services.NotesService, router));
         }
 
-        public ReactiveList<NoteViewModel> Notes => mNotes;
+        public RoutingState Router { get; }
 
-        public string SearchText
+        private void _RegisterParts()
         {
-            get { return mSearchText; }
-            set { this.RaiseAndSetIfChanged(ref mSearchText, value); }
-        }
+            var dependencyResolver = Locator.CurrentMutable;
 
-        public void Dispose()
-        {
-            mDisposables.Dispose();
-        }
-
-        private static Func<NoteViewModel, bool> _BuildFilter(string searchText)
-        {
-            if (string.IsNullOrWhiteSpace(searchText))
-            {
-                return note => true;
-            }
-
-            return note => (note.Model.Title?.IndexOf(searchText, StringComparison.OrdinalIgnoreCase) ?? -1) >= 0;
+            dependencyResolver.RegisterConstant(this, typeof(IScreen));
+            dependencyResolver.Register(() => new NoteListView(), typeof(IViewFor<NoteListViewModel>));
+            dependencyResolver.Register(() => new NoteEditView(), typeof(IViewFor<NoteEditViewModel>));
         }
     }
 }

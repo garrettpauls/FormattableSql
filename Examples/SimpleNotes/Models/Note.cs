@@ -10,8 +10,8 @@ namespace SimpleNotes.Models
     {
         private readonly IDisposable mUpdateUpdatedSubscription;
         private long mId;
-        private string mText;
-        private string mTitle;
+        private string mText = "";
+        private string mTitle = "";
         private Instant mUpdated;
 
         public Note(Instant? created = null)

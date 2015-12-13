@@ -1,4 +1,5 @@
-﻿using SimpleNotes.Framework;
+﻿using ReactiveUI;
+using SimpleNotes.Framework;
 using System;
 using System.Threading.Tasks;
 
@@ -12,10 +13,12 @@ namespace SimpleNotes.Services
         {
             NotesService = new NotesService();
             PersistenceService = new PersistenceService(NotesService).TrackWith(mDisposables);
+            Router = new RoutingState();
         }
 
         public NotesService NotesService { get; }
         public PersistenceService PersistenceService { get; }
+        public RoutingState Router { get; }
 
         public void Dispose()
         {
