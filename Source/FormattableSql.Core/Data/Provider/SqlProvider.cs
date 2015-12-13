@@ -2,7 +2,7 @@ using System;
 using System.Data.Common;
 using System.Globalization;
 
-namespace FormattableSql.Core.Data
+namespace FormattableSql.Core.Data.Provider
 {
     public abstract class SqlProvider : ISqlProvider
     {

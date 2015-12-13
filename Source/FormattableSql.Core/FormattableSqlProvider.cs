@@ -1,4 +1,5 @@
 ﻿using FormattableSql.Core.Data;
+using FormattableSql.Core.Data.Provider;
 using System;
 using System.Collections.Generic;
 using System.Data.Common;
@@ -44,8 +45,23 @@ namespace FormattableSql.Core
             return ExecuteAsync(sql, CancellationToken.None);
         }
 
-        public async Task<IReadOnlyList<int>> ExecuteManyAsync<TItem>(
+        public Task<IReadOnlyList<int>> ExecuteManyAsync<TItem>(
             Func<TItem, FormattableString> buildSql,
+            CancellationToken cancellationToken,
+            IEnumerable<TItem> items)
+        {
+            return ExecuteManyParamsAsync(buildSql, cancellationToken, items.ToArray());
+        }
+
+        public Task<IReadOnlyList<int>> ExecuteManyAsync<TItem>(
+            Func<TItem, FormattableString> buildSql,
+            IEnumerable<TItem> items)
+        {
+            return ExecuteManyAsync(buildSql, CancellationToken.None, items);
+        }
+
+        public async Task<IReadOnlyList<int>> ExecuteManyParamsAsync<TItem>(
+                            Func<TItem, FormattableString> buildSql,
             CancellationToken cancellationToken,
             params TItem[] items)
         {
@@ -70,26 +86,11 @@ namespace FormattableSql.Core
             return results;
         }
 
-        public Task<IReadOnlyList<int>> ExecuteManyAsync<TItem>(
+        public Task<IReadOnlyList<int>> ExecuteManyParamsAsync<TItem>(
             Func<TItem, FormattableString> buildSql,
             params TItem[] items)
         {
             return ExecuteManyAsync(buildSql, items.AsEnumerable());
-        }
-
-        public Task<IReadOnlyList<int>> ExecuteManyAsync<TItem>(
-            Func<TItem, FormattableString> buildSql,
-            CancellationToken cancellationToken,
-            IEnumerable<TItem> items)
-        {
-            return ExecuteManyAsync(buildSql, cancellationToken, items.ToArray());
-        }
-
-        public Task<IReadOnlyList<int>> ExecuteManyAsync<TItem>(
-            Func<TItem, FormattableString> buildSql,
-            IEnumerable<TItem> items)
-        {
-            return ExecuteManyAsync(buildSql, CancellationToken.None, items);
         }
 
         public Task<T> ExecuteScalarAsync<T>(

@@ -20,7 +20,7 @@ namespace SimpleNotes.Services
         private readonly Subject<bool> mIsInitialized = new Subject<bool>();
         private readonly NotesService mNotesService;
 
-        private readonly FormattableSqlProvider mSql =
+        private readonly IFormattableSqlProvider mSql =
             new FormattableSqlProvider(SQLiteSqlProvider.FromFile(
                 Path.Combine(Environment.CurrentDirectory, "data.sqlite3")));
 

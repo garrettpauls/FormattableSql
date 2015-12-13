@@ -1,6 +1,6 @@
 ﻿using System.Data.Common;
 
-namespace FormattableSql.Core.Data
+namespace FormattableSql.Core.Data.Provider
 {
     public interface ISqlProvider
     {

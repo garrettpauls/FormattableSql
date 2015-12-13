@@ -1,4 +1,5 @@
 ﻿using FormattableSql.Core.Data;
+using FormattableSql.Core.Data.Provider;
 using System;
 using System.Data.Common;
 using System.Data.SQLite;

@@ -31,18 +31,21 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
+    <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
     <Reference Include="System.Data" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Data\Provider\AdoNetSqlProvider.cs" />
     <Compile Include="Data\DbDataReaderAsyncRecord.cs" />
-    <Compile Include="Data\GenericSqlProvider.cs" />
+    <Compile Include="Data\Provider\GenericSqlProvider.cs" />
     <Compile Include="Data\IAsyncDataRecord.cs" />
-    <Compile Include="Data\SqlProvider.cs" />
+    <Compile Include="Data\Provider\SqlProvider.cs" />
+    <Compile Include="FormattableSqlFactory.cs" />
     <Compile Include="FormattableSqlProvider.cs" />
     <Compile Include="IFormattableSqlProvider.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Data\ISqlProvider.cs" />
+    <Compile Include="Data\Provider\ISqlProvider.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

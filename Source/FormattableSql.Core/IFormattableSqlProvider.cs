@@ -20,20 +20,20 @@ namespace FormattableSql.Core
         Task<IReadOnlyList<int>> ExecuteManyAsync<TItem>(
             Func<TItem, FormattableString> buildSql,
             CancellationToken cancellationToken,
-            params TItem[] items);
+            IEnumerable<TItem> items);
 
         Task<IReadOnlyList<int>> ExecuteManyAsync<TItem>(
             Func<TItem, FormattableString> buildSql,
-            params TItem[] items);
+            IEnumerable<TItem> items);
 
-        Task<IReadOnlyList<int>> ExecuteManyAsync<TItem>(
+        Task<IReadOnlyList<int>> ExecuteManyParamsAsync<TItem>(
             Func<TItem, FormattableString> buildSql,
             CancellationToken cancellationToken,
-            IEnumerable<TItem> items);
+            params TItem[] items);
 
-        Task<IReadOnlyList<int>> ExecuteManyAsync<TItem>(
+        Task<IReadOnlyList<int>> ExecuteManyParamsAsync<TItem>(
             Func<TItem, FormattableString> buildSql,
-            IEnumerable<TItem> items);
+            params TItem[] items);
 
         Task<T> ExecuteScalarAsync<T>(
             FormattableString sql);
