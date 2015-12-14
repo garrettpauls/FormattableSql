@@ -1,13 +1,14 @@
 <?xml version="1.0"?>
 <package>
   <metadata>
-    <id>FormattableSql.Core</id>
+    <id>FormattableSql</id>
     <version>$version$</version>
     <authors>Garrett Pauls</authors>
     <owners>Garrett Pauls</owners>
     <licenseUrl>https://raw.githubusercontent.com/garrettpauls/FormattableSql/master/LICENSE.txt</licenseUrl>
     <projectUrl>https://github.com/garrettpauls/FormattableSql</projectUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <title>Formattable SQL</title>
     <description>Use C# 6 and FormattableString to convert SQL and embedded data to properly parameterized commands.</description>
     <releaseNotes>
       <![CDATA[
