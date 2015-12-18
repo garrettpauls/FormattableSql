@@ -3,12 +3,9 @@ using FormattableSql.Core.Data.Provider;
 using FormattableSql.Core.Tests.Utilities;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
-using Moq.Protected;
 using System;
-using System.Data;
 using System.Data.Common;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace FormattableSql.Core.Tests
 {

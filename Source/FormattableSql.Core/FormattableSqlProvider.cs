@@ -1,4 +1,5 @@
 ﻿using FormattableSql.Core.Data;
+using FormattableSql.Core.Data.Extensions;
 using FormattableSql.Core.Data.Provider;
 using System;
 using System.Collections.Generic;
@@ -175,18 +176,7 @@ namespace FormattableSql.Core
         {
             var command = connection.CreateCommand();
 
-            var parameterNames = sql
-                .GetArguments()
-                .Select((arg, idx) =>
-                {
-                    var param = mSQLProvider.CreateParameter(command, (uint)idx, arg);
-                    command.Parameters.Add(param);
-                    return param.ParameterName;
-                })
-                .Cast<object>()
-                .ToArray();
-
-            command.CommandText = string.Format(sql.Format, parameterNames);
+            command.ConfigureFrom(sql, mSQLProvider);
 
             CommandPrepared?.Invoke(this, command);
 
