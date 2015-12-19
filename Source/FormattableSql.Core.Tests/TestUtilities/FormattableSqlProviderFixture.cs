@@ -14,14 +14,13 @@ namespace FormattableSql.Core.Tests.TestUtilities
             SqlProvider.Setup(x => x.CreateParameter(It.IsAny<DbCommand>(), It.IsAny<uint>(), It.IsAny<object>()))
                        .Returns<DbCommand, uint, object>(_CreateParameter);
 
+            Command = new DbCommandBuilder().Build().AsMock();
+
             Connection.Protected().Setup<DbCommand>("CreateDbCommand").Returns(Command.Object);
             Connection.Protected().Setup<DbTransaction>("BeginDbTransaction", ItExpr.IsAny<IsolationLevel>()).Returns(Transaction.Object);
-
-            Command.SetupAllProperties();
-            Command.Protected().Setup<DbParameterCollection>("DbParameterCollection").Returns(new DbParameterCollectionImpl());
         }
 
-        public Mock<DbCommand> Command { get; } = new Mock<DbCommand>();
+        public Mock<DbCommand> Command { get; }
 
         public Mock<DbConnection> Connection { get; } = new Mock<DbConnection>();
 

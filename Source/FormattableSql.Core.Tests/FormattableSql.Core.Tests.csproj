@@ -67,10 +67,14 @@
   </Choose>
   <ItemGroup>
     <Compile Include="Data\Extensions\CommandExtensionsTests.cs" />
+    <Compile Include="Data\Provider\GenericSqlProviderTests.cs" />
+    <Compile Include="Data\Provider\SqlProviderTests.cs" />
     <Compile Include="FormattableSqlProviderTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="TestUtilities\DbCommandBuilder.cs" />
     <Compile Include="TestUtilities\DbParameterCollectionImpl.cs" />
     <Compile Include="TestUtilities\FormattableSqlProviderFixture.cs" />
+    <Compile Include="TestUtilities\MockExtensions.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\FormattableSql.Core\FormattableSql.Core.csproj">
