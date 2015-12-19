@@ -4,6 +4,7 @@ using FormattableSql.Core.Data.Provider;
 using System;
 using System.Collections.Generic;
 using System.Data.Common;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -41,11 +42,13 @@ namespace FormattableSql.Core
             return result;
         }
 
+        [ExcludeFromCodeCoverage]
         public Task<int> ExecuteAsync(FormattableString sql)
         {
             return ExecuteAsync(sql, CancellationToken.None);
         }
 
+        [ExcludeFromCodeCoverage]
         public Task<IReadOnlyList<int>> ExecuteManyAsync<TItem>(
             Func<TItem, FormattableString> buildSql,
             CancellationToken cancellationToken,
@@ -54,6 +57,7 @@ namespace FormattableSql.Core
             return ExecuteManyParamsAsync(buildSql, cancellationToken, items.ToArray());
         }
 
+        [ExcludeFromCodeCoverage]
         public Task<IReadOnlyList<int>> ExecuteManyAsync<TItem>(
             Func<TItem, FormattableString> buildSql,
             IEnumerable<TItem> items)
@@ -87,6 +91,7 @@ namespace FormattableSql.Core
             return results;
         }
 
+        [ExcludeFromCodeCoverage]
         public Task<IReadOnlyList<int>> ExecuteManyParamsAsync<TItem>(
             Func<TItem, FormattableString> buildSql,
             params TItem[] items)
@@ -94,6 +99,7 @@ namespace FormattableSql.Core
             return ExecuteManyAsync(buildSql, items.AsEnumerable());
         }
 
+        [ExcludeFromCodeCoverage]
         public Task<T> ExecuteScalarAsync<T>(
             FormattableString sql)
         {
@@ -133,6 +139,7 @@ namespace FormattableSql.Core
             return results.AsReadOnly();
         }
 
+        [ExcludeFromCodeCoverage]
         public Task<IReadOnlyCollection<TResult>> QueryAsync<TResult>(
             FormattableString query,
             Func<IAsyncDataRecord, Task<TResult>> createResultAsync)
@@ -156,6 +163,7 @@ namespace FormattableSql.Core
             }
         }
 
+        [ExcludeFromCodeCoverage]
         public Task QueryAsync(
             FormattableString query,
             Func<IAsyncDataRecord, Task> handleRowAsync)
@@ -163,6 +171,7 @@ namespace FormattableSql.Core
             return QueryAsync(query, handleRowAsync, CancellationToken.None);
         }
 
+        [ExcludeFromCodeCoverage]
         private static async Task<DbDataReader> _ExecuteReaderAsync(
             DbCommand command,
             CancellationToken cancellationToken)
