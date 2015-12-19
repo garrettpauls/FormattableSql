@@ -20,6 +20,11 @@ namespace FormattableSql.Core.Tests.TestUtilities
             return mCommand.Object;
         }
 
+        public Mock<DbCommand> BuildMock()
+        {
+            return mCommand;
+        }
+
         public DbCommandBuilder WithMockParameters()
         {
             return this

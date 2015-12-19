@@ -1,6 +1,8 @@
 ﻿using FormattableSql.Core.Data.Provider;
 using Moq;
 using Moq.Protected;
+using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
 
@@ -8,19 +10,19 @@ namespace FormattableSql.Core.Tests.TestUtilities
 {
     public sealed class FormattableSqlProviderFixture
     {
+        private Action<Mock<DbCommand>> mCommandConfiguration;
+
         public FormattableSqlProviderFixture()
         {
             SqlProvider.Setup(x => x.CreateConnection()).Returns(Connection.Object);
             SqlProvider.Setup(x => x.CreateParameter(It.IsAny<DbCommand>(), It.IsAny<uint>(), It.IsAny<object>()))
                        .Returns<DbCommand, uint, object>(_CreateParameter);
 
-            Command = new DbCommandBuilder().Build().AsMock();
-
-            Connection.Protected().Setup<DbCommand>("CreateDbCommand").Returns(Command.Object);
+            Connection.Protected().Setup<DbCommand>("CreateDbCommand").Returns(_BuildCommand);
             Connection.Protected().Setup<DbTransaction>("BeginDbTransaction", ItExpr.IsAny<IsolationLevel>()).Returns(Transaction.Object);
         }
 
-        public Mock<DbCommand> Command { get; }
+        public List<Mock<DbCommand>> Commands { get; } = new List<Mock<DbCommand>>();
 
         public Mock<DbConnection> Connection { get; } = new Mock<DbConnection>();
 
@@ -43,6 +45,12 @@ namespace FormattableSql.Core.Tests.TestUtilities
             Connection.Protected().Verify<DbCommand>("CreateDbCommand", times);
         }
 
+        public FormattableSqlProviderFixture WithCommandConfiguration(Action<Mock<DbCommand>> configuration)
+        {
+            mCommandConfiguration = configuration;
+            return this;
+        }
+
         private static DbParameter _CreateParameter(DbCommand cmd, uint idx, object value)
         {
             var param = new Mock<DbParameter>();
@@ -52,6 +60,16 @@ namespace FormattableSql.Core.Tests.TestUtilities
             param.Object.Value = value;
 
             return param.Object;
+        }
+
+        private DbCommand _BuildCommand()
+        {
+            var command = new DbCommandBuilder().BuildMock();
+
+            mCommandConfiguration?.Invoke(command);
+            Commands.Add(command);
+
+            return command.Object;
         }
     }
 }

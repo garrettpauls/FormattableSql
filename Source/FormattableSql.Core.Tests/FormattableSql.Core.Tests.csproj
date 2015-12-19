@@ -74,7 +74,6 @@
     <Compile Include="TestUtilities\DbCommandBuilder.cs" />
     <Compile Include="TestUtilities\DbParameterCollectionImpl.cs" />
     <Compile Include="TestUtilities\FormattableSqlProviderFixture.cs" />
-    <Compile Include="TestUtilities\MockExtensions.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\FormattableSql.Core\FormattableSql.Core.csproj">
