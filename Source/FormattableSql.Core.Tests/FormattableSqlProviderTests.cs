@@ -2,9 +2,7 @@
 using FormattableSql.Core.Tests.TestUtilities;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
-using Moq.Protected;
 using System;
-using System.Data;
 using System.Threading;
 using System.Threading.Tasks;
 

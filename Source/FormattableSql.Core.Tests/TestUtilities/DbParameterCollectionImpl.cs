@@ -2,10 +2,12 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Data.Common;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 
 namespace FormattableSql.Core.Tests.TestUtilities
 {
+    [ExcludeFromCodeCoverage]
     public sealed class DbParameterCollectionImpl : DbParameterCollection
     {
         private readonly List<DbParameter> mParameters = new List<DbParameter>();

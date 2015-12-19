@@ -4,6 +4,7 @@
 bin/
 obj/
 /TestResults
+*.user
 
 # Nuget
 *.nupkg
