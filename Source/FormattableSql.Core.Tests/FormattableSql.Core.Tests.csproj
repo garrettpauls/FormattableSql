@@ -72,6 +72,7 @@
     <Compile Include="FormattableSqlProviderTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TestUtilities\DbCommandBuilder.cs" />
+    <Compile Include="TestUtilities\DbDataReaderBuilder.cs" />
     <Compile Include="TestUtilities\DbParameterCollectionImpl.cs" />
     <Compile Include="TestUtilities\FormattableSqlProviderFixture.cs" />
   </ItemGroup>

@@ -66,7 +66,7 @@ namespace FormattableSql.Core
         }
 
         public async Task<IReadOnlyList<int>> ExecuteManyParamsAsync<TItem>(
-                            Func<TItem, FormattableString> buildSql,
+            Func<TItem, FormattableString> buildSql,
             CancellationToken cancellationToken,
             params TItem[] items)
         {
@@ -128,13 +128,13 @@ namespace FormattableSql.Core
         }
 
         public async Task<IReadOnlyCollection<TResult>> QueryAsync<TResult>(
-                                            FormattableString query,
-            Func<IAsyncDataRecord, Task<TResult>> createResultAsync,
+            FormattableString query,
+            Func<IAsyncDataRecord, CancellationToken, Task<TResult>> createResultAsync,
             CancellationToken cancellationToken)
         {
             var results = new List<TResult>();
 
-            await QueryAsync(query, async row => results.Add(await createResultAsync(row)), cancellationToken);
+            await QueryAsync(query, async (row, ct) => results.Add(await createResultAsync(row, ct)), cancellationToken);
 
             return results.AsReadOnly();
         }
@@ -144,12 +144,12 @@ namespace FormattableSql.Core
             FormattableString query,
             Func<IAsyncDataRecord, Task<TResult>> createResultAsync)
         {
-            return QueryAsync(query, createResultAsync, CancellationToken.None);
+            return QueryAsync(query, (row, ct) => createResultAsync(row), CancellationToken.None);
         }
 
         public async Task QueryAsync(
             FormattableString query,
-            Func<IAsyncDataRecord, Task> handleRowAsync,
+            Func<IAsyncDataRecord, CancellationToken, Task> handleRowAsync,
             CancellationToken cancellationToken)
         {
             using (var connection = await _OpenNewConnectionAsync(cancellationToken))
@@ -158,7 +158,7 @@ namespace FormattableSql.Core
             {
                 while (await reader.ReadAsync(cancellationToken))
                 {
-                    await handleRowAsync(new DbDataReaderAsyncRecord(reader));
+                    await handleRowAsync(new DbDataReaderAsyncRecord(reader), cancellationToken);
                 }
             }
         }
@@ -168,7 +168,7 @@ namespace FormattableSql.Core
             FormattableString query,
             Func<IAsyncDataRecord, Task> handleRowAsync)
         {
-            return QueryAsync(query, handleRowAsync, CancellationToken.None);
+            return QueryAsync(query, (row, ct) => handleRowAsync(row), CancellationToken.None);
         }
 
         [ExcludeFromCodeCoverage]
@@ -180,7 +180,7 @@ namespace FormattableSql.Core
         }
 
         private DbCommand _CreateCommand(
-            DbConnection connection,
+                                                                                                                            DbConnection connection,
             FormattableString sql)
         {
             var command = connection.CreateCommand();

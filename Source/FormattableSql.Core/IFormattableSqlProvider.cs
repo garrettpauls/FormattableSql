@@ -44,7 +44,7 @@ namespace FormattableSql.Core
 
         Task<IReadOnlyCollection<TResult>> QueryAsync<TResult>(
             FormattableString query,
-            Func<IAsyncDataRecord, Task<TResult>> createResultAsync,
+            Func<IAsyncDataRecord, CancellationToken, Task<TResult>> createResultAsync,
             CancellationToken cancellationToken);
 
         Task<IReadOnlyCollection<TResult>> QueryAsync<TResult>(
@@ -53,7 +53,7 @@ namespace FormattableSql.Core
 
         Task QueryAsync(
             FormattableString query,
-            Func<IAsyncDataRecord, Task> handleRowAsync,
+            Func<IAsyncDataRecord, CancellationToken, Task> handleRowAsync,
             CancellationToken cancellationToken);
 
         Task QueryAsync(

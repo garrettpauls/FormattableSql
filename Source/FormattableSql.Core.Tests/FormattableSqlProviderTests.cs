@@ -3,9 +3,10 @@ using FormattableSql.Core.Tests.TestUtilities;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using System;
+using System.Collections.Generic;
+using System.Data.Common;
 using System.Linq;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace FormattableSql.Core.Tests
 {
@@ -19,7 +20,7 @@ namespace FormattableSql.Core.Tests
             var ct = CancellationToken.None;
             var fixture = new FormattableSqlProviderFixture()
                 .WithCommandConfiguration(
-                    cmd => cmd.Setup(x => x.ExecuteNonQueryAsync(ct)).Returns(Task.FromResult(1)));
+                    builder => builder.WithExecuteNonQueryAsyncReturning(1, ct));
 
             var sql = fixture.CreateSut();
 
@@ -55,12 +56,9 @@ namespace FormattableSql.Core.Tests
             var ct = CancellationToken.None;
             var fixture = new FormattableSqlProviderFixture()
                 .WithCommandConfiguration(
-                    cmd => cmd.Setup(x => x.ExecuteNonQueryAsync(ct)).Returns(Task.FromResult(1)));
+                    builder => builder.WithExecuteNonQueryAsyncReturning(1, ct));
 
             var sql = fixture.CreateSut();
-
-            var date = DateTime.MaxValue;
-            var id = 1;
 
             var itemA = new
             {
@@ -100,6 +98,71 @@ namespace FormattableSql.Core.Tests
                 command.Parameters[0].Value.Should().Be(item.Name, "each parameter should have the value of its respective formattable argument");
                 command.Parameters[1].ParameterName.Should().Be("@p1", "each parameter should have a name according to its argument index");
                 command.Parameters[1].Value.Should().Be(item.Date, "each parameter should have the value of its respective formattable argument");
+            }
+        }
+
+        [TestMethod]
+        public void QueryAsyncIntegrationTest()
+        {
+            // setup
+            var ct = CancellationToken.None;
+            var readers = new List<DbDataReader>();
+            var queryData = new[]
+            {
+                new
+                {
+                    Name = "a",
+                    Date = new DateTime(2015, 12, 12)
+                },
+                new
+                {
+                    Name = "b",
+                    Date = new DateTime(2015, 1, 1)
+                }
+            };
+            var fixture = new FormattableSqlProviderFixture()
+                .WithCommandConfiguration(
+                    builder => builder.WithExecuteReaderReturning(
+                        () => new DbDataReaderBuilder()
+                                  .TrackWith(readers)
+                                  .WithResults(queryData)
+                                  .Build()));
+
+            var sql = fixture.CreateSut();
+            var id = 1;
+
+            // execute
+            var results = sql.QueryAsync(
+                $"select Name, Date from Item where Id={id}",
+                async (row, ct2) => new
+                {
+                    Name = await row.GetValueAsync<string>("Name", ct2),
+                    Date = await row.GetValueAsync<DateTime>("Date", ct2)
+                }, CancellationToken.None).Result;
+
+            // verify
+            fixture.SqlProvider.Verify(x => x.CreateConnection(), Times.Once);
+            fixture.Connection.Verify(x => x.OpenAsync(ct), Times.Once);
+            fixture.VerifyConnectionCreateCommand(Times.Once());
+
+            readers.Should().HaveCount(1, "one reader should have been created");
+            results.Should().HaveCount(2, "two results should have been returned by the reader");
+
+            var command = fixture.Commands[0].Object;
+            command.CommandText.Should().Be("select Name, Date from Item where Id=@p0");
+            command.Parameters.Count.Should().Be(1, "one parameter should be generated for each formattable argument");
+            command.Parameters[0].ParameterName.Should().Be("@p0", "each parameter should have a name according to its argument index");
+            command.Parameters[0].Value.Should().Be(id, "each parameter should have the value of its respective formattable argument"); ;
+
+            var resultPair = results.Zip(queryData, Tuple.Create);
+
+            foreach (var tuple in resultPair)
+            {
+                var result = tuple.Item1;
+                var data = tuple.Item2;
+
+                result.Name.Should().Be(data.Name, "the Name result should map to the Name value");
+                result.Date.Should().Be(data.Date, "the Date result should map to the Date value");
             }
         }
     }

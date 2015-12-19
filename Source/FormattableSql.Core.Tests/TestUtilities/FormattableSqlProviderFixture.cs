@@ -10,7 +10,7 @@ namespace FormattableSql.Core.Tests.TestUtilities
 {
     public sealed class FormattableSqlProviderFixture
     {
-        private Action<Mock<DbCommand>> mCommandConfiguration;
+        private Action<DbCommandBuilder> mCommandConfiguration;
 
         public FormattableSqlProviderFixture()
         {
@@ -45,7 +45,7 @@ namespace FormattableSql.Core.Tests.TestUtilities
             Connection.Protected().Verify<DbCommand>("CreateDbCommand", times);
         }
 
-        public FormattableSqlProviderFixture WithCommandConfiguration(Action<Mock<DbCommand>> configuration)
+        public FormattableSqlProviderFixture WithCommandConfiguration(Action<DbCommandBuilder> configuration)
         {
             mCommandConfiguration = configuration;
             return this;
@@ -64,11 +64,12 @@ namespace FormattableSql.Core.Tests.TestUtilities
 
         private DbCommand _BuildCommand()
         {
-            var command = new DbCommandBuilder().BuildMock();
+            var builder = new DbCommandBuilder();
 
-            mCommandConfiguration?.Invoke(command);
+            mCommandConfiguration?.Invoke(builder);
+
+            var command = builder.BuildMock();
             Commands.Add(command);
-
             return command.Object;
         }
     }
