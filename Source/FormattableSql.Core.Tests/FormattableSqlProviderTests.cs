@@ -1,11 +1,12 @@
 ﻿using FluentAssertions;
-using FormattableSql.Core.Data.Provider;
-using FormattableSql.Core.Tests.Utilities;
+using FormattableSql.Core.Tests.TestUtilities;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
+using Moq.Protected;
 using System;
-using System.Data.Common;
+using System.Data;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace FormattableSql.Core.Tests
 {
@@ -13,51 +14,38 @@ namespace FormattableSql.Core.Tests
     public class FormattableSqlProviderTests
     {
         [TestMethod]
-        public void ExecuteAsyncTest()
+        public void ExecuteAsyncIntegrationTest()
         {
-            var a = "a";
-            var b = 2;
-            var c = Guid.NewGuid();
+            // setup
+            var ct = CancellationToken.None;
+            var fixture = new FormattableSqlProviderFixture();
+            fixture.Command.Setup(x => x.ExecuteNonQueryAsync(ct)).Returns(Task.FromResult(1));
 
-            _RunTest(
-                (sql, token) => sql.ExecuteAsync($"A={a}; B={b}; C={c}", token).Wait(token),
-                (sql, connection, transaction, command, token) =>
-                {
-                    command.Object.Parameters.Should().HaveCount(3, "all format parameters should be added as db parameters");
-                    command.Object.Parameters[0].ParameterName.Should().Be("@0", "commands should be added in order");
-                    command.Object.Parameters[0].Value.Should().Be(a, "parameter[0] should have the value of the corresponding format argument");
-                    command.Object.Parameters[1].ParameterName.Should().Be("@1", "commands should be added in order");
-                    command.Object.Parameters[1].Value.Should().Be(b, "parameter[1] should have the value of the corresponding format argument");
-                    command.Object.Parameters[2].ParameterName.Should().Be("@2", "commands should be added in order");
-                    command.Object.Parameters[2].Value.Should().Be(c, "parameter[2] should have the value of the corresponding format argument");
-                });
-        }
+            var sql = fixture.CreateSut();
 
-        private static void _RunTest(
-            Action<FormattableSqlProvider, CancellationToken> testAction,
-            Action<Mock<ISqlProvider>, MockDbConnection, MockTransaction, Mock<DbCommand>, CancellationToken> verifyAction)
-        {
-            var provider = new Mock<ISqlProvider>(MockBehavior.Strict);
-            var connection = new MockDbConnection();
-            var transaction = new MockTransaction(connection);
-            var command = new Mock<DbCommand>(MockBehavior.Strict);
-            var token = new CancellationToken();
+            var date = DateTime.MaxValue;
+            var id = 1;
 
-            provider.Setup(x => x.CreateConnection()).Returns(connection);
-            provider.Setup(x => x.CreateParameter(It.IsAny<DbCommand>(), It.IsAny<uint>(), It.IsAny<object>()))
-                    .Returns<DbCommand, uint, object>((_, idx, value) =>
-                    {
-                        var param = new Mock<DbParameter>(MockBehavior.Loose);
-                        param.Object.ParameterName = $"@{idx}";
-                        param.Object.Value = value;
-                        return param.Object;
-                    });
+            // execute
+            var result = sql.ExecuteAsync($"select * from Item where date={date}, id={id}", ct).Result;
 
-            var sql = new FormattableSqlProvider(provider.Object);
+            // verify
+            fixture.SqlProvider.Verify(x => x.CreateConnection(), Times.Once);
+            fixture.Connection.Verify(x => x.OpenAsync(ct), Times.Once);
+            fixture.VerifyConnectionBeginTransaction(Times.Once());
+            fixture.VerifyConnectionCreateCommand(Times.Once());
+            fixture.Command.Verify(x => x.ExecuteNonQueryAsync(ct), Times.Once);
+            fixture.Transaction.Verify(x => x.Commit(), Times.Once);
 
-            testAction(sql, token);
+            result.Should().Be(1);
 
-            verifyAction(provider, connection, transaction, command, token);
+            var command = fixture.Command.Object;
+            command.CommandText.Should().Be("select * from Item where date=@p0, id=@p1");
+            command.Parameters.Count.Should().Be(2, "one parameter should be generated for each formattable argument");
+            command.Parameters[0].ParameterName.Should().Be("@p0", "each parameter should have a name according to its argument index");
+            command.Parameters[0].Value.Should().Be(date, "each parameter should have the value of its respective formattable argument");
+            command.Parameters[1].ParameterName.Should().Be("@p1", "each parameter should have a name according to its argument index");
+            command.Parameters[1].Value.Should().Be(id, "each parameter should have the value of its respective formattable argument");
         }
     }
 }

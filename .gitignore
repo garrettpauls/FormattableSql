@@ -3,6 +3,7 @@
 /packages
 bin/
 obj/
+/TestResults
 
 # Nuget
 *.nupkg
