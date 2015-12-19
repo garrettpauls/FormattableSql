@@ -2,6 +2,8 @@
 
 A simple library for using C# 6 FormattableString to execute SQL commands.
 
+[![Build status](https://ci.appveyor.com/api/projects/status/1e3kn4qy7xkgiaxk?svg=true)](https://ci.appveyor.com/project/garrettpauls/formattablesql)
+
 # Supported backends
 
 This library should work with any backend that supports ADO.NET and query parameters,
