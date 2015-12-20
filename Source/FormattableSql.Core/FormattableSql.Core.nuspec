@@ -12,7 +12,12 @@
     <description>Use C# 6 and FormattableString to convert SQL and embedded data to properly parameterized commands.</description>
     <releaseNotes>
       <![CDATA[
-Version 1.0.0-alpha
+Version 1.0-beta
+
+* API improvements to handling cancellation tokens.
+* Improved unit test coverage.
+
+Version 1.0-alpha
 
 * An alpha release for testing the initial API.
 ]]>
