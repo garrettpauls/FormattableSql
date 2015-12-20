@@ -67,6 +67,7 @@
   </Choose>
   <ItemGroup>
     <Compile Include="Data\Extensions\CommandExtensionsTests.cs" />
+    <Compile Include="Data\Provider\AdoNetSqlProviderTests.cs" />
     <Compile Include="Data\Provider\GenericSqlProviderTests.cs" />
     <Compile Include="Data\Provider\SqlProviderTests.cs" />
     <Compile Include="FormattableSqlProviderTests.cs" />
@@ -74,6 +75,7 @@
     <Compile Include="TestUtilities\DbCommandBuilder.cs" />
     <Compile Include="TestUtilities\DbDataReaderBuilder.cs" />
     <Compile Include="TestUtilities\DbParameterCollectionImpl.cs" />
+    <Compile Include="TestUtilities\DbProviderFactoryBuilder.cs" />
     <Compile Include="TestUtilities\FormattableSqlProviderFixture.cs" />
   </ItemGroup>
   <ItemGroup>

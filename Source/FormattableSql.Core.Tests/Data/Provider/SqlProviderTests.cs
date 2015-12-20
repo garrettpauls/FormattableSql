@@ -3,8 +3,6 @@ using FormattableSql.Core.Data.Provider;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Data.Common;
-using System.Data.SqlClient;
-using System.Diagnostics.CodeAnalysis;
 
 using DbCommandBuilder = FormattableSql.Core.Tests.TestUtilities.DbCommandBuilder;
 

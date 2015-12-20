@@ -1,10 +1,11 @@
-﻿using System;
-using System.Data.Common;
+﻿using System.Data.Common;
+using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace FormattableSql.Core.Data
 {
+    [ExcludeFromCodeCoverage]
     public sealed class DbDataReaderAsyncRecord : IAsyncDataRecord
     {
         private readonly DbDataReader mReader;
