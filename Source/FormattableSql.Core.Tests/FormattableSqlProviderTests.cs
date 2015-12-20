@@ -102,6 +102,40 @@ namespace FormattableSql.Core.Tests
         }
 
         [TestMethod]
+        public void ExecuteScalarAsyncIntegrationTest()
+        {
+            // setup
+            var date = DateTime.MaxValue;
+            var id = 1;
+
+            var ct = CancellationToken.None;
+            var fixture = new FormattableSqlProviderFixture()
+                .WithCommandConfiguration(
+                    builder => builder.WithExecuteScalarAsyncReturning(date.ToString("O"), ct));
+
+            var sql = fixture.CreateSut();
+
+            // execute
+            var result = sql.ExecuteScalarAsync<DateTime>($"select top 1 Date from Item where Id={id} order by Date desc", ct).Result;
+
+            // verify
+            fixture.SqlProvider.Verify(x => x.CreateConnection(), Times.Once);
+            fixture.Connection.Verify(x => x.OpenAsync(ct), Times.Once);
+            fixture.VerifyConnectionBeginTransaction(Times.Once());
+            fixture.VerifyConnectionCreateCommand(Times.Once());
+            fixture.Commands[0].Verify(x => x.ExecuteScalarAsync(ct), Times.Once);
+            fixture.Transaction.Verify(x => x.Commit(), Times.Once);
+
+            result.Should().Be(date);
+
+            var command = fixture.Commands[0].Object;
+            command.CommandText.Should().Be("select top 1 Date from Item where Id=@p0 order by Date desc");
+            command.Parameters.Count.Should().Be(1, "one parameter should be generated for each formattable argument");
+            command.Parameters[0].ParameterName.Should().Be("@p0", "each parameter should have a name according to its argument index");
+            command.Parameters[0].Value.Should().Be(id, "each parameter should have the value of its respective formattable argument");
+        }
+
+        [TestMethod]
         public void QueryAsyncIntegrationTest()
         {
             // setup
@@ -122,7 +156,7 @@ namespace FormattableSql.Core.Tests
             };
             var fixture = new FormattableSqlProviderFixture()
                 .WithCommandConfiguration(
-                    builder => builder.WithExecuteReaderReturning(
+                    builder => builder.WithExecuteReaderAsyncReturning(
                         () => new DbDataReaderBuilder()
                                   .TrackWith(readers)
                                   .WithResults(queryData)

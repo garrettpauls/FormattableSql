@@ -37,10 +37,17 @@ namespace FormattableSql.Core.Tests.TestUtilities
             return this;
         }
 
-        public DbCommandBuilder WithExecuteReaderReturning(Func<DbDataReader> createReader)
+        public DbCommandBuilder WithExecuteReaderAsyncReturning(Func<DbDataReader> createReader)
         {
             mCommand.Protected().Setup<Task<DbDataReader>>("ExecuteDbDataReaderAsync", ItExpr.IsAny<CommandBehavior>(), ItExpr.IsAny<CancellationToken>())
                     .Returns<CommandBehavior, CancellationToken>((b, t) => Task.FromResult(createReader()));
+            return this;
+        }
+
+        public DbCommandBuilder WithExecuteScalarAsyncReturning(object value, CancellationToken token)
+        {
+            mCommand.Setup(x => x.ExecuteScalarAsync(token))
+                    .Returns<CancellationToken>(ct => Task.FromResult(value));
             return this;
         }
 
