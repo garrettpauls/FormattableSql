@@ -14,6 +14,14 @@ namespace FormattableSql.Core.Tests
     public class FormattableSqlProviderTests
     {
         [TestMethod]
+        public void ConstructorNullSqlProviderTest()
+        {
+            new Action(() => new FormattableSqlProvider(null))
+                .ShouldThrow<ArgumentNullException>()
+                .Which.ParamName.Should().Be("sqlProvider");
+        }
+
+        [TestMethod]
         public void ExecuteAsyncIntegrationTest()
         {
             // setup

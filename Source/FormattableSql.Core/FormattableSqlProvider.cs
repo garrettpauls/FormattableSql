@@ -19,6 +19,11 @@ namespace FormattableSql.Core
 
         public FormattableSqlProvider(ISqlProvider sqlProvider)
         {
+            if (sqlProvider == null)
+            {
+                throw new ArgumentNullException(nameof(sqlProvider));
+            }
+
             mSQLProvider = sqlProvider;
         }
 
