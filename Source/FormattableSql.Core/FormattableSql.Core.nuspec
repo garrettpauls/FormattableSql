@@ -16,6 +16,7 @@ Version 1.0-beta
 
 * API improvements to handling cancellation tokens.
 * Improved unit test coverage.
+* Updated DbDataReaderAsyncRecord to check values for null.
 
 Version 1.0-alpha
 

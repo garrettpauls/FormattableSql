@@ -20,9 +20,20 @@ namespace FormattableSql.Core.Data
             return GetValueAsync<T>(ordinal, CancellationToken.None);
         }
 
-        public Task<T> GetValueAsync<T>(int ordinal, CancellationToken cancellationToken)
+        public async Task<T> GetValueAsync<T>(int ordinal, CancellationToken cancellationToken)
         {
-            return mReader.GetFieldValueAsync<T>(ordinal, cancellationToken);
+            T result;
+
+            if (await IsDBNullAsync(ordinal, cancellationToken))
+            {
+                result = default(T);
+            }
+            else
+            {
+                result = await mReader.GetFieldValueAsync<T>(ordinal, cancellationToken);
+            }
+
+            return result;
         }
 
         public Task<T> GetValueAsync<T>(string fieldName)

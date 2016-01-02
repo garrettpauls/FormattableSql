@@ -67,6 +67,7 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
+    <Compile Include="Data\DbDataReaderAsyncRecordTests.cs" />
     <Compile Include="Data\Extensions\CommandExtensionsTests.cs" />
     <Compile Include="Data\Provider\AdoNetSqlProviderTests.cs" />
     <Compile Include="Data\Provider\GenericSqlProviderTests.cs" />
