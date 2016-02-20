@@ -1,12 +1,16 @@
-﻿using FluentAssertions;
-using FormattableSql.Core.Tests.TestUtilities;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Moq;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Data.Common;
 using System.Linq;
 using System.Threading;
+
+using FluentAssertions;
+
+using FormattableSql.Core.Tests.TestUtilities;
+
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+
+using Moq;
 
 namespace FormattableSql.Core.Tests
 {
@@ -93,19 +97,19 @@ namespace FormattableSql.Core.Tests
 
             results.Should().HaveCount(2, "one result should be returned per item");
 
-            var commandAndItem = new[] { itemA, itemB }.Zip(fixture.Commands, Tuple.Create);
-            foreach (var tuple in commandAndItem)
+            var commandAndItem = new[] {itemA, itemB}.Zip(fixture.Commands, Tuple.Create);
+            foreach(var tuple in commandAndItem)
             {
                 var commandMock = tuple.Item2;
                 var item = tuple.Item1;
                 var command = commandMock.Object;
 
-                command.CommandText.Should().Be("insert into Item (name, date) values (@p0, @p1)");
-                command.Parameters.Count.Should().Be(2, "one parameter should be generated for each formattable argument");
-                command.Parameters[0].ParameterName.Should().Be("@p0", "each parameter should have a name according to its argument index");
-                command.Parameters[0].Value.Should().Be(item.Name, "each parameter should have the value of its respective formattable argument");
-                command.Parameters[1].ParameterName.Should().Be("@p1", "each parameter should have a name according to its argument index");
-                command.Parameters[1].Value.Should().Be(item.Date, "each parameter should have the value of its respective formattable argument");
+                AssertionExtensions.Should((string) command.CommandText).Be("insert into Item (name, date) values (@p0, @p1)");
+                AssertionExtensions.Should((int) command.Parameters.Count).Be(2, "one parameter should be generated for each formattable argument");
+                AssertionExtensions.Should((string) command.Parameters[0].ParameterName).Be("@p0", "each parameter should have a name according to its argument index");
+                AssertionExtensions.Should((object) command.Parameters[0].Value).Be(item.Name, "each parameter should have the value of its respective formattable argument");
+                AssertionExtensions.Should((string) command.Parameters[1].ParameterName).Be("@p1", "each parameter should have a name according to its argument index");
+                AssertionExtensions.Should((object) command.Parameters[1].Value).Be(item.Date, "each parameter should have the value of its respective formattable argument");
             }
         }
 
@@ -141,6 +145,41 @@ namespace FormattableSql.Core.Tests
             command.Parameters.Count.Should().Be(1, "one parameter should be generated for each formattable argument");
             command.Parameters[0].ParameterName.Should().Be("@p0", "each parameter should have a name according to its argument index");
             command.Parameters[0].Value.Should().Be(id, "each parameter should have the value of its respective formattable argument");
+        }
+
+        [TestMethod]
+        public void ExecuteScalarAsyncNullableResultTest()
+        {
+            // setup
+            var ct = CancellationToken.None;
+            var fixture = new FormattableSqlProviderFixture()
+                .WithCommandConfiguration(
+                    builder => builder.WithExecuteScalarAsyncReturning((int?)null, ct));
+
+            var sql = fixture.CreateSut();
+
+            // execute
+            var result = sql.ExecuteScalarAsync<int?>($"select top 1 Value from Item", ct).Result;
+
+            // verify
+            result.Should().Be(null);
+        }
+        [TestMethod]
+        public void ExecuteScalarAsyncNonNullableResultTest()
+        {
+            // setup
+            var ct = CancellationToken.None;
+            var fixture = new FormattableSqlProviderFixture()
+                .WithCommandConfiguration(
+                    builder => builder.WithExecuteScalarAsyncReturning((short)1, ct));
+
+            var sql = fixture.CreateSut();
+
+            // execute
+            var result = sql.ExecuteScalarAsync<long>($"select top 1 Value from Item", ct).Result;
+
+            // verify
+            result.Should().Be(1);
         }
 
         [TestMethod]
@@ -194,17 +233,18 @@ namespace FormattableSql.Core.Tests
             command.CommandText.Should().Be("select Name, Date from Item where Id=@p0");
             command.Parameters.Count.Should().Be(1, "one parameter should be generated for each formattable argument");
             command.Parameters[0].ParameterName.Should().Be("@p0", "each parameter should have a name according to its argument index");
-            command.Parameters[0].Value.Should().Be(id, "each parameter should have the value of its respective formattable argument"); ;
+            command.Parameters[0].Value.Should().Be(id, "each parameter should have the value of its respective formattable argument");
+            ;
 
             var resultPair = results.Zip(queryData, Tuple.Create);
 
-            foreach (var tuple in resultPair)
+            foreach(var tuple in resultPair)
             {
                 var result = tuple.Item1;
                 var data = tuple.Item2;
 
-                result.Name.Should().Be(data.Name, "the Name result should map to the Name value");
-                result.Date.Should().Be(data.Date, "the Date result should map to the Date value");
+                AssertionExtensions.Should((string) result.Name).Be(data.Name, "the Name result should map to the Name value");
+                AssertionExtensions.Should((DateTime) result.Date).Be(data.Date, "the Date result should map to the Date value");
             }
         }
     }

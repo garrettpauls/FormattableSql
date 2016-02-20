@@ -1,13 +1,14 @@
-﻿using FormattableSql.Core.Data;
-using FormattableSql.Core.Data.Extensions;
-using FormattableSql.Core.Data.Provider;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Data.Common;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+
+using FormattableSql.Core.Data;
+using FormattableSql.Core.Data.Extensions;
+using FormattableSql.Core.Data.Provider;
 
 namespace FormattableSql.Core
 {
@@ -19,12 +20,32 @@ namespace FormattableSql.Core
 
         public FormattableSqlProvider(ISqlProvider sqlProvider)
         {
-            if (sqlProvider == null)
+            if(sqlProvider == null)
             {
                 throw new ArgumentNullException(nameof(sqlProvider));
             }
 
             mSQLProvider = sqlProvider;
+        }
+
+        private DbCommand _CreateCommand(
+            DbConnection connection,
+            FormattableString sql)
+        {
+            var command = connection.CreateCommand();
+
+            command.ConfigureFrom(sql, mSQLProvider);
+
+            CommandPrepared?.Invoke(this, command);
+
+            return command;
+        }
+
+        private async Task<DbConnection> _OpenNewConnectionAsync(CancellationToken cancellationToken)
+        {
+            var connection = mSQLProvider.CreateConnection();
+            await connection.OpenAsync(cancellationToken);
+            return connection;
         }
 
         public event CommandPreparedEventHandler CommandPrepared;
@@ -35,9 +56,9 @@ namespace FormattableSql.Core
         {
             int result;
 
-            using (var connection = await _OpenNewConnectionAsync(cancellationToken))
-            using (var transaction = connection.BeginTransaction())
-            using (var command = _CreateCommand(connection, sql))
+            using(var connection = await _OpenNewConnectionAsync(cancellationToken))
+            using(var transaction = connection.BeginTransaction())
+            using(var command = _CreateCommand(connection, sql))
             {
                 result = await command.ExecuteNonQueryAsync(cancellationToken);
                 cancellationToken.ThrowIfCancellationRequested();
@@ -77,12 +98,12 @@ namespace FormattableSql.Core
         {
             var results = new int[items.Length];
 
-            using (var connection = await _OpenNewConnectionAsync(cancellationToken))
-            using (var transaction = connection.BeginTransaction())
+            using(var connection = await _OpenNewConnectionAsync(cancellationToken))
+            using(var transaction = connection.BeginTransaction())
             {
-                for (int i = 0; i < items.Length; i++)
+                for(int i = 0; i < items.Length; i++)
                 {
-                    using (var command = _CreateCommand(connection, buildSql(items[i])))
+                    using(var command = _CreateCommand(connection, buildSql(items[i])))
                     {
                         results[i] = await command.ExecuteNonQueryAsync(cancellationToken);
                     }
@@ -117,14 +138,14 @@ namespace FormattableSql.Core
         {
             T result;
 
-            using (var connection = await _OpenNewConnectionAsync(cancellationToken))
-            using (var transaction = connection.BeginTransaction())
-            using (var command = _CreateCommand(connection, sql))
+            using(var connection = await _OpenNewConnectionAsync(cancellationToken))
+            using(var transaction = connection.BeginTransaction())
+            using(var command = _CreateCommand(connection, sql))
             {
                 var objResult = await command.ExecuteScalarAsync(cancellationToken);
                 cancellationToken.ThrowIfCancellationRequested();
 
-                result = (T)Convert.ChangeType(objResult, typeof(T));
+                result = _ChangeType<T>(objResult);
                 cancellationToken.ThrowIfCancellationRequested();
                 transaction.Commit();
             }
@@ -157,11 +178,11 @@ namespace FormattableSql.Core
             Func<IAsyncDataRecord, CancellationToken, Task> handleRowAsync,
             CancellationToken cancellationToken)
         {
-            using (var connection = await _OpenNewConnectionAsync(cancellationToken))
-            using (var command = _CreateCommand(connection, query))
-            using (var reader = await _ExecuteReaderAsync(command, cancellationToken))
+            using(var connection = await _OpenNewConnectionAsync(cancellationToken))
+            using(var command = _CreateCommand(connection, query))
+            using(var reader = await _ExecuteReaderAsync(command, cancellationToken))
             {
-                while (await reader.ReadAsync(cancellationToken))
+                while(await reader.ReadAsync(cancellationToken))
                 {
                     await handleRowAsync(new DbDataReaderAsyncRecord(reader), cancellationToken);
                 }
@@ -176,32 +197,33 @@ namespace FormattableSql.Core
             return QueryAsync(query, (row, ct) => handleRowAsync(row), CancellationToken.None);
         }
 
+        private static TResult _ChangeType<TResult>(object value)
+        {
+            TResult result;
+
+            var resultType = typeof(TResult);
+            if(value == null || value == DBNull.Value)
+            {
+                result = default(TResult);
+            }
+            else if(resultType.IsGenericType && resultType.GetGenericTypeDefinition() == typeof(Nullable<>))
+            {
+                result = (TResult) Convert.ChangeType(value, Nullable.GetUnderlyingType(resultType));
+            }
+            else
+            {
+                result = (TResult) Convert.ChangeType(value, typeof(TResult));
+            }
+
+            return result;
+        }
+
         [ExcludeFromCodeCoverage]
         private static async Task<DbDataReader> _ExecuteReaderAsync(
             DbCommand command,
             CancellationToken cancellationToken)
         {
             return await command.ExecuteReaderAsync(cancellationToken);
-        }
-
-        private DbCommand _CreateCommand(
-                                                                                                                            DbConnection connection,
-            FormattableString sql)
-        {
-            var command = connection.CreateCommand();
-
-            command.ConfigureFrom(sql, mSQLProvider);
-
-            CommandPrepared?.Invoke(this, command);
-
-            return command;
-        }
-
-        private async Task<DbConnection> _OpenNewConnectionAsync(CancellationToken cancellationToken)
-        {
-            var connection = mSQLProvider.CreateConnection();
-            await connection.OpenAsync(cancellationToken);
-            return connection;
         }
     }
 }

@@ -17,6 +17,7 @@ Version 1.0-beta
 * API improvements to handling cancellation tokens.
 * Improved unit test coverage.
 * Updated DbDataReaderAsyncRecord to check values for null.
+* Fixed exception when calling ExecuteScalarAsync with a Nullable<> type parameter.
 
 Version 1.0-alpha
 
